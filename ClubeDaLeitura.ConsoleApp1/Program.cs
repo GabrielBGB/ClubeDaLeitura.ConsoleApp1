@@ -11,11 +11,15 @@ class Program
         var repositorioCaixa = new RepositorioCaixa();
         var telaCaixa = new TelaCaixa(repositorioCaixa);
 
+        var repositorioRevista = new RepositorioRevista();
+        var telaRevista = new TelaRevista(repositorioRevista, repositorioCaixa);
+
         while (true)
         {
             Console.WriteLine("\n--- Clube da Leitura ---");
             Console.WriteLine("1. Módulo Amigos");
             Console.WriteLine("2. Módulo Caixas");
+            Console.WriteLine("3. Módulo Revistas");
             Console.WriteLine("0. Sair");
             Console.Write("Escolha o módulo: ");
             string modulo = Console.ReadLine()!;
@@ -27,6 +31,7 @@ class Program
             {
                 case "1": MenuAmigos(telaAmigo); break;
                 case "2": MenuCaixas(telaCaixa); break;
+                case "3": MenuRevistas(telaRevista); break;
                 default: Console.WriteLine("Opção inválida."); break;
             }
         }
@@ -83,4 +88,31 @@ class Program
             }
         }
     }
+
+    static void MenuRevistas(TelaRevista tela)
+    {
+        while (true)
+        {
+            Console.WriteLine("\n--- Módulo Revistas ---");
+            Console.WriteLine("1. Inserir Revista");
+            Console.WriteLine("2. Visualizar Revistas");
+            Console.WriteLine("3. Editar Revista");
+            Console.WriteLine("4. Excluir Revista");
+            Console.WriteLine("0. Voltar");
+            Console.Write("Opção: ");
+            string opcao = Console.ReadLine()!;
+            Console.Clear();
+
+            switch (opcao)
+            {
+                case "1": tela.Inserir(); break;
+                case "2": tela.VisualizarTodos(); break;
+                case "3": tela.Editar(); break;
+                case "4": tela.Excluir(); break;
+                case "0": return;
+                default: Console.WriteLine("Opção inválida."); break;
+            }
+        }
+    }
+
 }
