@@ -25,3 +25,38 @@ O sistema permite o **cadastro de amigos, caixas e revistas**, além do **regist
 ---
 
 ## 🧱 Estrutura do Projeto
+
+/ClubeDaLeitura
+│
+├── Dominio/ # Classes de negócio (Amigo, Caixa, Revista, Emprestimo)
+├── Dados/ # Repositórios para persistência em memória
+├── Apresentacao/ # Telas de interação com o usuário
+├── Program.cs # Menu principal
+
+---
+
+## 🛠️ Tecnologias Utilizadas
+
+- Linguagem: **C#**
+- Plataforma: **.NET Console Application**
+- Paradigma: **Programação Orientada a Objetos (POO)**
+- IDE: **Visual Studio 2022**
+- Versionamento: **Git e GitHub**
+
+---
+## 🎥 Demonstração
+
+> 
+
+---
+
+## 📚 Requisitos de Negócio Atendidos
+
+- 📌 Amigo não pode ser excluído com empréstimos ativos
+- 📌 Caixa não pode ser excluída com revistas vinculadas
+- 📌 Revista não pode ter edição repetida com mesmo título
+- 📌 Cada amigo só pode ter um empréstimo ativo
+- 📌 Validação de telefone, nome e campos obrigatórios
+- 📌 Empréstimos atrasados destacados visualmente
+
+---
