@@ -14,16 +14,12 @@ class Program
         var repositorioRevista = new RepositorioRevista();
         var telaRevista = new TelaRevista(repositorioRevista, repositorioCaixa);
 
-        var repositorioEmprestimo = new RepositorioEmprestimo();
-        var telaEmprestimo = new TelaEmprestimo(repositorioEmprestimo, repositorioAmigo, repositorioRevista);
-
         while (true)
         {
             Console.WriteLine("\n--- Clube da Leitura ---");
             Console.WriteLine("1. Módulo Amigos");
             Console.WriteLine("2. Módulo Caixas");
             Console.WriteLine("3. Módulo Revistas");
-            Console.WriteLine("4. Módulo Empréstimos");
             Console.WriteLine("0. Sair");
             Console.Write("Escolha o módulo: ");
             string modulo = Console.ReadLine()!;
@@ -36,7 +32,6 @@ class Program
                 case "1": MenuAmigos(telaAmigo); break;
                 case "2": MenuCaixas(telaCaixa); break;
                 case "3": MenuRevistas(telaRevista); break;
-                case "4": MenuEmprestimos(telaEmprestimo); break;
                 default: Console.WriteLine("Opção inválida."); break;
             }
         }
@@ -114,32 +109,6 @@ class Program
                 case "2": tela.VisualizarTodos(); break;
                 case "3": tela.Editar(); break;
                 case "4": tela.Excluir(); break;
-                case "0": return;
-                default: Console.WriteLine("Opção inválida."); break;
-            }
-        }
-
-
-    }
-
-    static void MenuEmprestimos(TelaEmprestimo tela)
-    {
-        while (true)
-        {
-            Console.WriteLine("\n--- Módulo Empréstimos ---");
-            Console.WriteLine("1. Registrar Empréstimo");
-            Console.WriteLine("2. Registrar Devolução");
-            Console.WriteLine("3. Visualizar Todos");
-            Console.WriteLine("0. Voltar");
-            Console.Write("Opção: ");
-            string opcao = Console.ReadLine()!;
-            Console.Clear();
-
-            switch (opcao)
-            {
-                case "1": tela.RegistrarEmprestimo(); break;
-                case "2": tela.RegistrarDevolucao(); break;
-                case "3": tela.VisualizarEmprestimos(); break;
                 case "0": return;
                 default: Console.WriteLine("Opção inválida."); break;
             }
