@@ -6,7 +6,7 @@ Sistema de controle de empréstimos de revistas para amigos, organizado por caix
 
 ## 🧾 Descrição
 
-Este projeto foi desenvolvido como parte do curso de **Programação de Sistemas **, com foco em Programação Orientada a Objetos (POO) e boas práticas de desenvolvimento com C# em aplicações de console.
+Este projeto foi desenvolvido como parte do curso de ** Programação de Sistemas **, com foco em Programação Orientada a Objetos (POO) e boas práticas de desenvolvimento com C# em aplicações de console.
 
 O sistema permite o **cadastro de amigos, caixas e revistas**, além do **registro de empréstimos**, respeitando diversas regras de negócio, como prazo de devolução calculado automaticamente e validações robustas.
 
