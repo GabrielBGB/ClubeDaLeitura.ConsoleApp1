@@ -46,7 +46,7 @@ O sistema permite o **cadastro de amigos, caixas e revistas**, além do **regist
 ---
 ## 🎥 Demonstração
 
-> 
+![Demonstração do módulo de Empréstimos](https://imgur.com/SBTSHb6.gif)
 
 ---
 
