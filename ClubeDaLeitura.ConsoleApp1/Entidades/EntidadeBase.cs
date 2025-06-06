@@ -1,0 +1,1 @@
+﻿csharp // Local: Entidades/EntidadeBase.cs namespace ClubeDaLeitura.Entidades { public abstract class EntidadeBase { public int Id { get; set; } } }
