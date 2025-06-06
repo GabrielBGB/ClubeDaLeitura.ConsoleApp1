@@ -1,61 +1,46 @@
-﻿namespace ClubeDaLeitura.Entidades
-{
-    public enum StatusEmprestimo
-    {
-        Aberto,
-        Concluido,
-        Atrasado
-    }
+﻿// Local: ClubeDaLeitura.ConsoleApp1/Entidades/Emprestimo.cs
+using System;
+using System.Collections.Generic;
 
-    public class Emprestimo
+namespace ClubeDaLeitura.ConsoleApp1.Entidades
+{
+    public class Emprestimo : EntidadeBase
     {
-        public int Id { get; set; }
         public Amigo Amigo { get; set; }
         public Revista Revista { get; set; }
         public DateTime DataEmprestimo { get; set; }
-        public DateTime DataDevolucao { get; private set; }
-        public StatusEmprestimo Status { get; private set; }
+        public DateTime DataDevolucao { get; set; }
 
-        public Emprestimo()
+        // ADICIONE ESTA PROPRIEDADE
+        public string Status { get; set; } = "Aberto"; // Valor padrão
+
+        public override string[] Validar()
         {
-            Status = StatusEmprestimo.Aberto;
-        }
-
-        public bool Validar(out string erros)
-        {
-            erros = "";
-
+            List<string> erros = new List<string>();
             if (Amigo == null)
-                erros += "Amigo é obrigatório.\n";
+                erros.Add("O campo 'Amigo' é obrigatório.");
+            if (Revista == null)
+                erros.Add("O campo 'Revista' é obrigatório.");
+            else if (Revista.Status != "Disponível")
+                erros.Add("A revista selecionada não está disponível para empréstimo.");
 
-            if (Revista == null || Revista.Status != StatusRevista.Disponivel)
-                erros += "Revista inválida ou indisponível.\n";
-
-            return erros == "";
+            // Adicionar regra que amigo não pode ter empréstimo em aberto ou multas...
+            return erros.ToArray();
         }
 
-        public void RegistrarEmprestimo()
+        public void Fechar()
         {
-            DataEmprestimo = DateTime.Now;
-            DataDevolucao = DataEmprestimo.AddDays(Revista.Caixa.DiasEmprestimo);
-            Revista.Emprestar();
-            Status = StatusEmprestimo.Aberto;
+            if (Status == "Aberto")
+            {
+                Status = "Fechado";
+                Revista.Status = "Disponível";
+            }
         }
 
-        public void RegistrarDevolucao()
+        public override string ToString()
         {
-            Revista.Devolver();
-
-            if (DateTime.Now > DataDevolucao)
-                Status = StatusEmprestimo.Atrasado;
-            else
-                Status = StatusEmprestimo.Concluido;
-        }
-
-        public void AtualizarStatus()
-        {
-            if (Status == StatusEmprestimo.Aberto && DateTime.Now > DataDevolucao)
-                Status = StatusEmprestimo.Atrasado;
+            // ATUALIZE O TOSTRING PARA MOSTRAR O STATUS
+            return $"Id: {Id} | Status: {Status} | Amigo: {Amigo?.Nome} | Revista: {Revista?.Titulo} | Devolução: {DataDevolucao.ToShortDateString()}";
         }
     }
 }

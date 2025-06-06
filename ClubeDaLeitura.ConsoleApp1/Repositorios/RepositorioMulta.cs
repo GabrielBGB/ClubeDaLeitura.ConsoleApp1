@@ -1,30 +1,23 @@
-﻿using ClubeDaLeitura.ConsoleApp1.Entidades;
-using ClubeDaLeitura.Entidades;
-using ClubeDaLeitura.Repositorios;
-using System.Collections.Generic;
-using System.Linq;
+﻿// Local: ClubeDaLeitura.ConsoleApp1/Repositorios/RepositorioMulta.cs
+using ClubeDaLeitura.ConsoleApp1.Entidades;
 
 namespace ClubeDaLeitura.ConsoleApp1.Repositorios
 {
     public class RepositorioMulta : RepositorioBase<Multa>
     {
-        public RepositorioMulta() : base("multas.json")
+        // O repositório filho só precisa saber COMO editar. O resto é herdado.
+        public override void Editar(int id, Multa multaAtualizada)
         {
+            Multa multaExistente = SelecionarPorId(id);
+
+            if (multaExistente != null)
+            {
+                multaExistente.Valor = multaAtualizada.Valor;
+                multaExistente.EstaPaga = multaAtualizada.EstaPaga;
+            }
         }
 
-        public List<Multa> SelecionarMultasPendentes()
-        {
-            return registros.Where(m => m.Status == StatusMulta.Pendente).ToList();
-        }
-
-        public bool AmigoTemMultaPendente(Amigo amigo)
-        {
-            return registros.Any(m => m.Amigo.Id == amigo.Id && m.Status == StatusMulta.Pendente);
-        }
-
-        public List<Multa> SelecionarMultasPorAmigo(Amigo amigo)
-        {
-            return registros.Where(m => m.Emprestimo.Amigo.Id == amigo.Id).ToList();
-        }
+        // NÃO COLOQUE OS MÉTODOS Inserir, Excluir, SelecionarTodos ou SelecionarPorId AQUI.
+        // Eles já existem na classe RepositorioBase!
     }
 }

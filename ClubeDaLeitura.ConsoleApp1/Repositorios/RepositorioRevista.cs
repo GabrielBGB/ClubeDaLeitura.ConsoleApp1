@@ -1,47 +1,20 @@
-﻿using ClubeDaLeitura.Entidades;
+﻿using ClubeDaLeitura.ConsoleApp1.Entidades;
 
-namespace ClubeDaLeitura.Repositorios
+namespace ClubeDaLeitura.ConsoleApp1.Repositorios
 {
-    public class RepositorioRevista
+    public class RepositorioRevista : RepositorioBase<Revista>
     {
-        private List<Revista> revistas = new();
-        private int contadorId = 1;
-
-        public void Inserir(Revista revista)
+        // PRECISA IMPLEMENTAR O MÉTODO 'EDITAR' DA CLASSE BASE
+        public override void Editar(int id, Revista revistaAtualizada)
         {
-            revista.Id = contadorId++;
-            revistas.Add(revista);
-        }
-
-        public bool Editar(int id, Revista nova)
-        {
-            var revista = SelecionarPorId(id);
-            if (revista == null) return false;
-
-            revista.Titulo = nova.Titulo;
-            revista.NumeroEdicao = nova.NumeroEdicao;
-            revista.Ano = nova.Ano;
-            revista.Caixa = nova.Caixa;
-
-            return true;
-        }
-
-        public bool Excluir(int id)
-        {
-            var revista = SelecionarPorId(id);
-            if (revista == null) return false;
-
-            revistas.Remove(revista);
-            return true;
-        }
-
-        public List<Revista> SelecionarTodos() => revistas;
-
-        public Revista? SelecionarPorId(int id) => revistas.FirstOrDefault(r => r.Id == id);
-
-        public bool ExisteComMesmoTituloEEdicao(string titulo, int edicao)
-        {
-            return revistas.Any(r => r.Titulo == titulo && r.NumeroEdicao == edicao);
+            Revista revistaExistente = SelecionarPorId(id);
+            if (revistaExistente != null)
+            {
+                revistaExistente.Titulo = revistaAtualizada.Titulo;
+                revistaExistente.NumeroEdicao = revistaAtualizada.NumeroEdicao;
+                revistaExistente.AnoPublicacao = revistaAtualizada.AnoPublicacao;
+                revistaExistente.Caixa = revistaAtualizada.Caixa;
+            }
         }
     }
 }

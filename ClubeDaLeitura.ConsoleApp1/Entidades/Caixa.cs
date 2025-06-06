@@ -1,28 +1,39 @@
-﻿namespace ClubeDaLeitura.Entidades
+﻿// Local: ClubeDaLeitura.ConsoleApp1/Entidades/Caixa.cs
+using System.Collections.Generic;
+
+namespace ClubeDaLeitura.ConsoleApp1.Entidades
 {
-    public class Caixa
+    public class Caixa : EntidadeBase
     {
-        public int Id { get; set; }
-        public string Etiqueta { get; set; }
         public string Cor { get; set; }
+        public string Etiqueta { get; set; }
         public int DiasEmprestimo { get; set; }
 
-        public List<int> IdsRevistas { get; set; } = new();
-
-        public bool Validar(out string erros)
+        // Sobrescreve o método Validar para implementar as regras de negócio específicas da Caixa.
+        public override string[] Validar()
         {
-            erros = "";
-
-            if (string.IsNullOrWhiteSpace(Etiqueta) || Etiqueta.Length > 50)
-                erros += "Etiqueta é obrigatória e deve ter no máximo 50 caracteres.\n";
+            // Usa uma lista para facilitar a adição de múltiplos erros.
+            List<string> erros = new List<string>();
 
             if (string.IsNullOrWhiteSpace(Cor))
-                erros += "Cor é obrigatória.\n";
+                erros.Add("O campo 'Cor' é obrigatório.");
+
+            if (string.IsNullOrWhiteSpace(Etiqueta))
+                erros.Add("O campo 'Etiqueta' é obrigatório.");
+            else if (Etiqueta.Length > 50)
+                erros.Add("O campo 'Etiqueta' não pode exceder 50 caracteres.");
 
             if (DiasEmprestimo <= 0)
-                erros += "Dias de empréstimo deve ser maior que 0.\n";
+                erros.Add("O campo 'Dias para Empréstimo' deve ser um número positivo.");
 
-            return erros == "";
+            // Converte a lista de erros em um array.
+            return erros.ToArray();
+        }
+
+        // Sobrescreve o ToString para uma exibição amigável nos menus.
+        public override string ToString()
+        {
+            return $"Id: {Id} | Etiqueta: {Etiqueta} | Cor: {Cor} | Prazo de Empréstimo: {DiasEmprestimo} dias";
         }
     }
 }

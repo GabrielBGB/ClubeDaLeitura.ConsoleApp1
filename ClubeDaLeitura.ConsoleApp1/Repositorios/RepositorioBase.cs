@@ -1,61 +1,44 @@
-﻿using System.Text.Json;
+﻿// Local: ClubeDaLeitura.ConsoleApp1/Repositorios/RepositorioBase.cs
+using ClubeDaLeitura.ConsoleApp1.Entidades;
+using System.Collections.Generic;
+using System.Linq;
 
-namespace ClubeDaLeitura.Repositorios
+namespace ClubeDaLeitura.ConsoleApp1.Repositorios
 {
+    // A restrição "where T : EntidadeBase" garante que qualquer tipo 'T' usado aqui
+    // DEVE ser uma classe que herda de EntidadeBase. Isso nos dá acesso ao 'Id'.
     public abstract class RepositorioBase<T> where T : EntidadeBase
     {
-        protected List<T> registros = new();
+        protected readonly List<T> registros = new List<T>();
         protected int contadorId = 1;
-        private readonly string caminhoArquivo;
 
-        public RepositorioBase(string nomeArquivo)
-        {
-            caminhoArquivo = Path.Combine("..", "..", "..", "dados", nomeArquivo);
-            CarregarDados();
-        }
-
-        private void CarregarDados()
-        {
-            if (!File.Exists(caminhoArquivo)) return;
-            string conteudoJson = File.ReadAllText(caminhoArquivo);
-            if (string.IsNullOrEmpty(conteudoJson)) return;
-            registros = JsonSerializer.Deserialize<List<T>>(conteudoJson);
-            if (registros.Count > 0)
-                contadorId = registros.Max(r => r.Id) + 1;
-        }
-
-        private void SalvarDados()
-        {
-            Directory.CreateDirectory(Path.GetDirectoryName(caminhoArquivo));
-            string conteudoJson = JsonSerializer.Serialize(registros, new JsonSerializerOptions { WriteIndented = true });
-            File.WriteAllText(caminhoArquivo, conteudoJson);
-        }
-
-        public void Inserir(T novoRegistro)
+        // "virtual" permite que este método seja sobrescrito por classes filhas, se necessário.
+        public virtual void Inserir(T novoRegistro)
         {
             novoRegistro.Id = contadorId++;
             registros.Add(novoRegistro);
-            SalvarDados();
         }
 
-        public void Editar(T registroEditado)
-        {
-            SalvarDados();
-        }
+        // O método Editar agora é abstrato, forçando a classe filha a implementar
+        // a lógica de como os campos devem ser atualizados.
+        public abstract void Editar(int id, T registroAtualizado);
 
-        public void Excluir(T registroSelecionado)
+        public void Excluir(int id)
         {
-            registros.Remove(registroSelecionado);
-            SalvarDados();
+            T registro = SelecionarPorId(id);
+            if (registro != null)
+                registros.Remove(registro);
         }
 
         public List<T> SelecionarTodos()
         {
-            return registros;
+            // Retorna uma cópia da lista ordenada por ID para exibição consistente.
+            return registros.OrderBy(r => r.Id).ToList();
         }
 
         public T SelecionarPorId(int id)
         {
+            // Usa LINQ para encontrar o primeiro registro com o Id correspondente.
             return registros.FirstOrDefault(r => r.Id == id);
         }
     }

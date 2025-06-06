@@ -1,97 +1,157 @@
-﻿using ClubeDaLeitura.Entidades;
-using ClubeDaLeitura.Repositorios;
+﻿// Local: ClubeDaLeitura.ConsoleApp1/Telas/TelaCaixa.cs
+using ClubeDaLeitura.ConsoleApp1.Entidades;
+using ClubeDaLeitura.ConsoleApp1.Repositorios;
+using System;
+using System.Collections.Generic;
 
-namespace ClubeDaLeitura.Telas
+namespace ClubeDaLeitura.ConsoleApp1.Telas
 {
-    public class TelaCaixa
+    public class TelaCaixa : ITelaCadastravel
     {
-        private RepositorioCaixa repositorio;
+        private readonly RepositorioCaixa repositorioCaixa;
 
-        public TelaCaixa(RepositorioCaixa repo)
+        public TelaCaixa(RepositorioCaixa repositorio)
         {
-            repositorio = repo;
+            repositorioCaixa = repositorio;
         }
 
         public void Inserir()
         {
-            Console.WriteLine("== Inserir Caixa ==");
+            MostrarCabecalho("Inserir Nova Caixa");
+            Caixa novaCaixa = ObterDadosCaixa();
+            string[] erros = novaCaixa.Validar();
 
-            var caixa = ObterCaixa();
-
-            if (!caixa.Validar(out string erros))
+            if (erros.Length > 0)
             {
-                Console.WriteLine("Erros:\n" + erros);
+                ApresentarErros(erros);
                 return;
             }
 
-            if (repositorio.ExisteEtiqueta(caixa.Etiqueta))
-            {
-                Console.WriteLine("Já existe uma caixa com esta etiqueta.");
-                return;
-            }
-
-            repositorio.Inserir(caixa);
-            Console.WriteLine("Caixa inserida com sucesso.");
-        }
-
-        public void VisualizarTodos()
-        {
-            var caixas = repositorio.SelecionarTodos();
-
-            Console.WriteLine("== Caixas Cadastradas ==");
-            foreach (var c in caixas)
-            {
-                Console.WriteLine($"ID: {c.Id} | Etiqueta: {c.Etiqueta} | Cor: {c.Cor} | Dias: {c.DiasEmprestimo}");
-            }
+            repositorioCaixa.Inserir(novaCaixa);
+            MostrarMensagem("Caixa inserida com sucesso!", ConsoleColor.Green);
         }
 
         public void Editar()
         {
-            VisualizarTodos();
-            Console.Write("Digite o ID da caixa para editar: ");
-            int id = int.Parse(Console.ReadLine()!);
-
-            var nova = ObterCaixa();
-
-            if (!nova.Validar(out string erros))
+            MostrarCabecalho("Editar Caixa");
+            if (!Listar())
             {
-                Console.WriteLine("Erros:\n" + erros);
+                MostrarMensagem("Nenhuma caixa para editar.", ConsoleColor.Yellow);
                 return;
             }
-
-            if (repositorio.Editar(id, nova))
-                Console.WriteLine("Caixa atualizada.");
-            else
-                Console.WriteLine("Caixa não encontrada.");
+            Console.Write("\nDigite o ID da caixa para editar: ");
+            int id = ObterIdValido();
+            if (repositorioCaixa.SelecionarPorId(id) == null)
+            {
+                MostrarMensagem("Caixa não encontrada.", ConsoleColor.Red);
+                return;
+            }
+            Caixa caixaAtualizada = ObterDadosCaixa();
+            string[] erros = caixaAtualizada.Validar();
+            if (erros.Length > 0)
+            {
+                ApresentarErros(erros);
+                return;
+            }
+            repositorioCaixa.Editar(id, caixaAtualizada);
+            MostrarMensagem("Caixa editada com sucesso!", ConsoleColor.Green);
         }
 
         public void Excluir()
         {
-            VisualizarTodos();
-            Console.Write("Digite o ID da caixa para excluir: ");
-            int id = int.Parse(Console.ReadLine()!);
-
-            if (repositorio.Excluir(id))
-                Console.WriteLine("Caixa excluída.");
-            else
-                Console.WriteLine("Não foi possível excluir. Verifique se há revistas vinculadas.");
+            MostrarCabecalho("Excluir Caixa");
+            if (!Listar())
+            {
+                MostrarMensagem("Nenhuma caixa para excluir.", ConsoleColor.Yellow);
+                return;
+            }
+            Console.Write("\nDigite o ID da caixa para excluir: ");
+            int id = ObterIdValido();
+            if (repositorioCaixa.SelecionarPorId(id) == null)
+            {
+                MostrarMensagem("Caixa não encontrada.", ConsoleColor.Red);
+                return;
+            }
+            repositorioCaixa.Excluir(id);
+            MostrarMensagem("Caixa excluída com sucesso!", ConsoleColor.Green);
         }
 
-        private Caixa ObterCaixa()
+        public bool Listar()
         {
-            Console.Write("Etiqueta: ");
-            string etiqueta = Console.ReadLine()!;
-            Console.Write("Cor (ex: vermelho ou #FF0000): ");
-            string cor = Console.ReadLine()!;
-            Console.Write("Dias de Empréstimo (padrão 7): ");
-            int dias = int.TryParse(Console.ReadLine(), out int diasInt) ? diasInt : 7;
-
-            return new Caixa
+            MostrarCabecalho("Listando Todas as Caixas");
+            List<Caixa> caixas = repositorioCaixa.SelecionarTodos();
+            if (caixas.Count == 0)
             {
-                Etiqueta = etiqueta,
-                Cor = cor,
-                DiasEmprestimo = dias
-            };
+                Console.WriteLine("Nenhuma caixa cadastrada.");
+                return false;
+            }
+            Console.WriteLine("{0,-5} | {1,-20} | {2,-15} | {3,-10}", "ID", "Etiqueta", "Cor", "Prazo (dias)");
+            Console.WriteLine(new string('-', 60));
+            foreach (var caixa in caixas)
+            {
+                Console.WriteLine("{0,-5} | {1,-20} | {2,-15} | {3,-10}", caixa.Id, caixa.Etiqueta, caixa.Cor, caixa.DiasEmprestimo);
+            }
+            return true;
+        }
+
+        // ======================================================
+        // MÉTODOS PRIVADOS DE AJUDA
+        // ======================================================
+
+        private Caixa ObterDadosCaixa()
+        {
+            Caixa caixa = new Caixa();
+            Console.Write("Digite a cor da caixa: ");
+            caixa.Cor = Console.ReadLine();
+            Console.Write("Digite a etiqueta da caixa: ");
+            caixa.Etiqueta = Console.ReadLine();
+            Console.Write("Digite o prazo máximo de empréstimo (em dias): ");
+
+            int diasEmprestimo;
+            while (!int.TryParse(Console.ReadLine(), out diasEmprestimo) || diasEmprestimo <= 0)
+            {
+                MostrarMensagem("Entrada inválida. Por favor, digite um número positivo.", ConsoleColor.Red);
+                Console.Write("Digite o prazo máximo de empréstimo (em dias): ");
+            }
+            caixa.DiasEmprestimo = diasEmprestimo;
+            return caixa;
+        }
+
+        private int ObterIdValido()
+        {
+            int id;
+            while (!int.TryParse(Console.ReadLine(), out id))
+            {
+                MostrarMensagem("Entrada inválida. Por favor, digite um número de ID.", ConsoleColor.Red);
+                Console.Write("Digite o ID novamente: ");
+            }
+            return id;
+        }
+
+        private void ApresentarErros(string[] erros)
+        {
+            MostrarMensagem("Por favor, corrija os seguintes erros:", ConsoleColor.Red);
+            foreach (string erro in erros)
+            {
+                Console.WriteLine($"- {erro}");
+            }
+            Console.ReadKey();
+        }
+
+        private void MostrarCabecalho(string titulo)
+        {
+            Console.Clear();
+            Console.WriteLine("--- Clube da Leitura ---");
+            Console.WriteLine($"\n{titulo}\n");
+        }
+
+        private void MostrarMensagem(string mensagem, ConsoleColor cor)
+        {
+            Console.ForegroundColor = cor;
+            Console.WriteLine($"\n{mensagem}");
+            Console.ResetColor();
+            Console.WriteLine("\nPressione qualquer tecla para continuar...");
+            Console.ReadKey();
         }
     }
 }

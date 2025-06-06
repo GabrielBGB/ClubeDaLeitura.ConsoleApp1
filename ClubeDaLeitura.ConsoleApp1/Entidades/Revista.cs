@@ -1,43 +1,37 @@
-﻿namespace ClubeDaLeitura.Entidades
-{
-    public enum StatusRevista
-    {
-        Disponivel,
-        Emprestada,
-        Reservada
-    }
+﻿// Local: ClubeDaLeitura.ConsoleApp1/Entidades/Revista.cs
+using System;
+using System.Collections.Generic;
 
-    public class Revista
+namespace ClubeDaLeitura.ConsoleApp1.Entidades
+{
+    public class Revista : EntidadeBase
     {
-        public int Id { get; set; }
         public string Titulo { get; set; }
         public int NumeroEdicao { get; set; }
-        public int Ano { get; set; }
-        public StatusRevista Status { get; set; } = StatusRevista.Disponivel;
-
+        public int AnoPublicacao { get; set; }
         public Caixa Caixa { get; set; }
 
-        public bool Validar(out string erros)
+        // ESTA PROPRIEDADE ESTAVA FALTANDO NO SEU ARQUIVO
+        public string Status { get; set; } = "Disponível";
+
+        public override string[] Validar()
         {
-            erros = "";
-
-            if (string.IsNullOrWhiteSpace(Titulo) || Titulo.Length < 2 || Titulo.Length > 100)
-                erros += "Título deve ter entre 2 e 100 caracteres.\n";
-
+            List<string> erros = new List<string>();
+            if (string.IsNullOrWhiteSpace(Titulo) || Titulo.Length < 2)
+                erros.Add("O campo 'Título' é obrigatório e deve ter no mínimo 2 caracteres.");
             if (NumeroEdicao <= 0)
-                erros += "Número da edição deve ser positivo.\n";
-
-            if (Ano < 1900 || Ano > DateTime.Now.Year)
-                erros += "Ano de publicação inválido.\n";
-
+                erros.Add("O 'Número da Edição' deve ser positivo.");
+            if (AnoPublicacao <= 1800 || AnoPublicacao > DateTime.Now.Year)
+                erros.Add("O 'Ano de Publicação' deve ser uma data válida.");
             if (Caixa == null)
-                erros += "Revista deve estar vinculada a uma caixa.\n";
-
-            return erros == "";
+                erros.Add("A 'Caixa' onde a revista será guardada é obrigatória.");
+            return erros.ToArray();
         }
 
-        public void Emprestar() => Status = StatusRevista.Emprestada;
-        public void Devolver() => Status = StatusRevista.Disponivel;
-        public void Reservar() => Status = StatusRevista.Reservada;
+        public override string ToString()
+        {
+            // O MÉTODO FOI ATUALIZADO PARA INCLUIR O STATUS
+            return $"Id: {Id} | Título: {Titulo} | Edição: {NumeroEdicao} | Status: {Status}";
+        }
     }
 }

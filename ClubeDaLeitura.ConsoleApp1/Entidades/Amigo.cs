@@ -1,28 +1,43 @@
-﻿namespace ClubeDaLeitura.Entidades
+﻿// Local: ClubeDaLeitura.ConsoleApp1/Entidades/Amigo.cs
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
+
+namespace ClubeDaLeitura.ConsoleApp1.Entidades
 {
-    public class Amigo
+    public class Amigo : EntidadeBase
     {
-        public int Id { get; set; }
         public string Nome { get; set; }
-        public string Responsavel { get; set; }
+        public string NomeResponsavel { get; set; }
         public string Telefone { get; set; }
 
-        public List<int> IdsEmprestimos { get; set; } = new();
-
-        public bool Validar(out string erros)
+        public override string[] Validar()
         {
-            erros = "";
+            List<string> erros = new List<string>();
 
-            if (string.IsNullOrWhiteSpace(Nome) || Nome.Length < 3 || Nome.Length > 100)
-                erros += "Nome deve ter entre 3 e 100 caracteres.\n";
+            if (string.IsNullOrWhiteSpace(Nome) || Nome.Length < 3)
+                erros.Add("O campo 'Nome' é obrigatório e deve ter no mínimo 3 caracteres.");
 
-            if (string.IsNullOrWhiteSpace(Responsavel) || Responsavel.Length < 3 || Responsavel.Length > 100)
-                erros += "Responsável deve ter entre 3 e 100 caracteres.\n";
+            if (string.IsNullOrWhiteSpace(NomeResponsavel) || NomeResponsavel.Length < 3)
+                erros.Add("O campo 'Nome do Responsável' é obrigatório e deve ter no mínimo 3 caracteres.");
 
-            if (!System.Text.RegularExpressions.Regex.IsMatch(Telefone, @"^\(\d{2}\) \d{4,5}-\d{4}$"))
-                erros += "Telefone deve estar no formato (XX) XXXX-XXXX ou (XX) XXXXX-XXXX.\n";
+            // --- INÍCIO DA CORREÇÃO ---
+            // Primeiro, verificamos se o telefone é nulo ou vazio. Só depois tentamos validar o formato.
+            if (string.IsNullOrWhiteSpace(Telefone))
+            {
+                erros.Add("O campo 'Telefone' é obrigatório.");
+            }
+            else if (!Regex.IsMatch(Telefone, @"^\(\d{2}\)\s\d{4,5}-\d{4}$"))
+            {
+                erros.Add("O campo 'Telefone' está em um formato inválido. Use (XX) XXXXX-XXXX.");
+            }
+            // --- FIM DA CORREÇÃO ---
 
-            return erros == "";
+            return erros.ToArray();
+        }
+
+        public override string ToString()
+        {
+            return $"Id: {Id} | Nome: {Nome} | Telefone: {Telefone} | Responsável: {NomeResponsavel}";
         }
     }
 }

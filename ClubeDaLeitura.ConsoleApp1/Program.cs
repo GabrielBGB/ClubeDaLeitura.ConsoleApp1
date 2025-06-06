@@ -1,149 +1,144 @@
-﻿using ClubeDaLeitura.Repositorios;
-using ClubeDaLeitura.Telas;
+﻿// Local: ClubeDaLeitura.ConsoleApp1/Program.cs
+using ClubeDaLeitura.ConsoleApp1.Entidades;
+using ClubeDaLeitura.ConsoleApp1.Repositorios;
+using ClubeDaLeitura.ConsoleApp1.Telas;
+using System;
 
-class Program
+// O NAMESPACE É A "CAIXA" EXTERNA DO PROJETO
+namespace ClubeDaLeitura.ConsoleApp1
 {
-    static void Main()
+    // A CLASSE PROGRAM É A "CASA" ONDE O CÓDIGO DEVE FICAR
+    class Program
     {
-        var repositorioAmigo = new RepositorioAmigo();
-        var telaAmigo = new TelaAmigo(repositorioAmigo);
-
-        var repositorioCaixa = new RepositorioCaixa();
-        var telaCaixa = new TelaCaixa(repositorioCaixa);
-
-        var repositorioRevista = new RepositorioRevista();
-        var telaRevista = new TelaRevista(repositorioRevista, repositorioCaixa);
-
-        var repositorioEmprestimo = new RepositorioEmprestimo();
-        var telaEmprestimo = new TelaEmprestimo(repositorioEmprestimo, repositorioAmigo, repositorioRevista);
-
-        while (true)
+        // O MÉTODO MAIN É A "PORTA DE ENTRADA". TUDO COMEÇA AQUI.
+        static void Main(string[] args)
         {
-            Console.WriteLine("\n--- Clube da Leitura ---");
-            Console.WriteLine("1. Módulo Amigos");
-            Console.WriteLine("2. Módulo Caixas");
-            Console.WriteLine("3. Módulo Revistas");
-            Console.WriteLine("4. Módulo Empréstimos");
-            Console.WriteLine("0. Sair");
-            Console.Write("Escolha o módulo: ");
-            string modulo = Console.ReadLine()!;
-            Console.Clear();
+            // --- BLOCO DE CRIAÇÃO DOS OBJETOS (INSTANCIAÇÃO) ---
+            // Primeiro, criamos todos os "armazéns" de dados
+            var repositorioCaixa = new RepositorioCaixa();
+            var repositorioAmigo = new RepositorioAmigo();
+            var repositorioRevista = new RepositorioRevista();
+            var repositorioMulta = new RepositorioMulta();
+            var repositorioEmprestimo = new RepositorioEmprestimo();
 
-            if (modulo == "0") break;
+            // Agora, criamos todas as telas, passando os repositórios que elas precisam
+            var telaCaixa = new TelaCaixa(repositorioCaixa);
+            var telaAmigo = new TelaAmigo(repositorioAmigo);
+            var telaRevista = new TelaRevista(repositorioRevista, repositorioCaixa, telaCaixa);
+            var telaMulta = new TelaMulta(repositorioMulta);
+            var telaEmprestimo = new TelaEmprestimo(repositorioEmprestimo, repositorioAmigo, repositorioRevista, repositorioMulta, telaAmigo, telaRevista);
 
-            switch (modulo)
+            // --- LOOP DO MENU PRINCIPAL (COM A ORDEM AJUSTADA) ---
+            bool continuar = true;
+            while (continuar)
             {
-                case "1": MenuAmigos(telaAmigo); break;
-                case "2": MenuCaixas(telaCaixa); break;
-                case "3": MenuRevistas(telaRevista); break;
-                case "4": MenuEmprestimos(telaEmprestimo); break;
-                default: Console.WriteLine("Opção inválida."); break;
-            }
-        }
-    }
+                Console.Clear();
+                Console.WriteLine("--- Clube da Leitura ---");
+                Console.WriteLine("Data: " + DateTime.Now.ToLongDateString());
 
-    static void MenuAmigos(TelaAmigo tela)
-    {
-        while (true)
-        {
-            Console.WriteLine("\n--- Módulo Amigos ---");
-            Console.WriteLine("1. Inserir Amigo");
-            Console.WriteLine("2. Visualizar Amigos");
-            Console.WriteLine("3. Editar Amigo");
-            Console.WriteLine("4. Excluir Amigo");
-            Console.WriteLine("0. Voltar");
-            Console.Write("Opção: ");
-            string opcao = Console.ReadLine()!;
-            Console.Clear();
+                // --- INÍCIO DA MUDANÇA ---
+                Console.WriteLine("\n[1] Gerenciar Amigos");      // Amigos agora é a opção 1
+                Console.WriteLine("[2] Gerenciar Caixas");       // Caixas agora é a opção 2
+                // --- FIM DA MUDANÇA ---
 
-            switch (opcao)
-            {
-                case "1": tela.Inserir(); break;
-                case "2": tela.VisualizarTodos(); break;
-                case "3": tela.Editar(); break;
-                case "4": tela.Excluir(); break;
-                case "0": return;
-                default: Console.WriteLine("Opção inválida."); break;
-            }
-        }
-    }
+                Console.WriteLine("[3] Gerenciar Revistas");
+                Console.WriteLine("[4] Gerenciar Empréstimos");
+                Console.WriteLine("[5] Gerenciar Multas");
+                Console.WriteLine("\n[0] Sair");
+                Console.Write("\nEscolha uma opção: ");
+                string opcao = Console.ReadLine();
 
-    static void MenuCaixas(TelaCaixa tela)
-    {
-        while (true)
-        {
-            Console.WriteLine("\n--- Módulo Caixas ---");
-            Console.WriteLine("1. Inserir Caixa");
-            Console.WriteLine("2. Visualizar Caixas");
-            Console.WriteLine("3. Editar Caixa");
-            Console.WriteLine("4. Excluir Caixa");
-            Console.WriteLine("0. Voltar");
-            Console.Write("Opção: ");
-            string opcao = Console.ReadLine()!;
-            Console.Clear();
+                switch (opcao)
+                {
+                    // --- INÍCIO DA MUDANÇA ---
+                    case "1": ExecutarMenuModulo("Gerenciar Amigos", telaAmigo); break; // Case 1 agora chama a tela de Amigos
+                    case "2": ExecutarMenuModulo("Gerenciar Caixas", telaCaixa); break; // Case 2 agora chama a tela de Caixas
+                    // --- FIM DA MUDANÇA ---
 
-            switch (opcao)
-            {
-                case "1": tela.Inserir(); break;
-                case "2": tela.VisualizarTodos(); break;
-                case "3": tela.Editar(); break;
-                case "4": tela.Excluir(); break;
-                case "0": return;
-                default: Console.WriteLine("Opção inválida."); break;
-            }
-        }
-    }
-
-    static void MenuRevistas(TelaRevista tela)
-    {
-        while (true)
-        {
-            Console.WriteLine("\n--- Módulo Revistas ---");
-            Console.WriteLine("1. Inserir Revista");
-            Console.WriteLine("2. Visualizar Revistas");
-            Console.WriteLine("3. Editar Revista");
-            Console.WriteLine("4. Excluir Revista");
-            Console.WriteLine("0. Voltar");
-            Console.Write("Opção: ");
-            string opcao = Console.ReadLine()!;
-            Console.Clear();
-
-            switch (opcao)
-            {
-                case "1": tela.Inserir(); break;
-                case "2": tela.VisualizarTodos(); break;
-                case "3": tela.Editar(); break;
-                case "4": tela.Excluir(); break;
-                case "0": return;
-                default: Console.WriteLine("Opção inválida."); break;
+                    case "3": ExecutarMenuModulo("Gerenciar Revistas", telaRevista); break;
+                    case "4": MenuEmprestimos(telaEmprestimo); break;
+                    case "5": telaMulta.ApresentarMenu(); break;
+                    case "0": continuar = false; break;
+                    default:
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine("\nOpção inválida!");
+                        Console.ResetColor();
+                        Console.ReadKey();
+                        break;
+                }
             }
         }
 
+        // --- MÉTODOS AUXILIARES PARA OS MENUS (DENTRO DA CLASSE PROGRAM) ---
 
-    }
-
-    static void MenuEmprestimos(TelaEmprestimo tela)
-    {
-        while (true)
+        // Menu para os cadastros simples (Caixa, Amigo, Revista)
+        static void ExecutarMenuModulo(string titulo, ITelaCadastravel tela)
         {
-            Console.WriteLine("\n--- Módulo Empréstimos ---");
-            Console.WriteLine("1. Registrar Empréstimo");
-            Console.WriteLine("2. Registrar Devolução");
-            Console.WriteLine("3. Visualizar Todos");
-            Console.WriteLine("0. Voltar");
-            Console.Write("Opção: ");
-            string opcao = Console.ReadLine()!;
-            Console.Clear();
-
-            switch (opcao)
+            bool voltar = false;
+            while (!voltar)
             {
-                case "1": tela.RegistrarEmprestimo(); break;
-                case "2": tela.RegistrarDevolucao(); break;
-                case "3": tela.VisualizarEmprestimos(); break;
-                case "0": return;
-                default: Console.WriteLine("Opção inválida."); break;
+                Console.Clear();
+                Console.WriteLine($"--- {titulo} ---");
+                Console.WriteLine("\n[1] Inserir novo registro");
+                Console.WriteLine("[2] Editar registro existente");
+                Console.WriteLine("[3] Excluir registro");
+                Console.WriteLine("[4] Listar todos os registros");
+                Console.WriteLine("\n[0] Voltar ao menu principal");
+
+                Console.Write("\nEscolha uma opção: ");
+                string opcao = Console.ReadLine();
+
+                switch (opcao)
+                {
+                    case "1": tela.Inserir(); break;
+                    case "2": tela.Editar(); break;
+                    case "3": tela.Excluir(); break;
+                    case "4":
+                        tela.Listar();
+                        Console.WriteLine("\nPressione qualquer tecla para continuar...");
+                        Console.ReadKey();
+                        break;
+                    case "0": voltar = true; break;
+                    default:
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine("\nOpção inválida!");
+                        Console.ResetColor();
+                        Console.ReadKey();
+                        break;
+                }
             }
         }
-    }
 
-}
+        // Menu específico para a tela de Empréstimos
+        static void MenuEmprestimos(TelaEmprestimo tela)
+        {
+            bool voltar = false;
+            while (!voltar)
+            {
+                Console.Clear();
+                Console.WriteLine("--- Gerenciar Empréstimos ---");
+                Console.WriteLine("\n[1] Registrar novo empréstimo");
+                Console.WriteLine("[2] Registrar devolução");
+                Console.WriteLine("[3] Listar todos os empréstimos");
+                Console.WriteLine("\n[0] Voltar ao menu principal");
+
+                Console.Write("\nEscolha uma opção: ");
+                string opcao = Console.ReadLine();
+
+                switch (opcao)
+                {
+                    case "1": tela.RegistrarEmprestimo(); break;
+                    case "2": tela.RegistrarDevolucao(); break;
+                    case "3": tela.ListarEmprestimos(); break;
+                    case "0": voltar = true; break;
+                    default:
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine("\nOpção inválida!");
+                        Console.ResetColor();
+                        Console.ReadKey();
+                        break;
+                }
+            }
+        }
+    } // FIM DA CLASSE PROGRAM
+} // FIM DO NAMESPACE

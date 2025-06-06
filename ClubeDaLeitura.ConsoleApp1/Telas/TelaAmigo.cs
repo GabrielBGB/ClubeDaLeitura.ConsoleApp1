@@ -1,97 +1,157 @@
-﻿using ClubeDaLeitura.Entidades;
-using ClubeDaLeitura.Repositorios;
+﻿// Local: ClubeDaLeitura.ConsoleApp1/Telas/TelaAmigo.cs
 
-namespace ClubeDaLeitura.Telas
+using ClubeDaLeitura.ConsoleApp1.Entidades;
+using ClubeDaLeitura.ConsoleApp1.Repositorios;
+using System;
+using System.Collections.Generic;
+
+namespace ClubeDaLeitura.ConsoleApp1.Telas
 {
-    public class TelaAmigo
+    public class TelaAmigo : ITelaCadastravel
     {
-        private RepositorioAmigo repositorio;
+        private readonly RepositorioAmigo repositorioAmigo;
 
-        public TelaAmigo(RepositorioAmigo repo)
+        public TelaAmigo(RepositorioAmigo repositorio)
         {
-            repositorio = repo;
+            repositorioAmigo = repositorio;
         }
 
         public void Inserir()
         {
-            Console.WriteLine("== Inserir Amigo ==");
+            MostrarCabecalho("Inserir Novo Amigo");
+            Amigo novoAmigo = ObterDadosAmigo(); // Este método agora está completo
 
-            var amigo = ObterAmigo();
-
-            if (!amigo.Validar(out string erros))
+            string[] erros = novoAmigo.Validar();
+            if (erros.Length > 0)
             {
-                Console.WriteLine("Erros:\n" + erros);
+                ApresentarErros(erros);
                 return;
             }
 
-            if (repositorio.ExisteAmigoComMesmoNomeTelefone(amigo.Nome, amigo.Telefone))
-            {
-                Console.WriteLine("Já existe um amigo com o mesmo nome e telefone.");
-                return;
-            }
-
-            repositorio.Inserir(amigo);
-            Console.WriteLine("Amigo inserido com sucesso.");
-        }
-
-        public void VisualizarTodos()
-        {
-            var amigos = repositorio.SelecionarTodos();
-
-            Console.WriteLine("== Amigos Cadastrados ==");
-            foreach (var a in amigos)
-            {
-                Console.WriteLine($"ID: {a.Id} | Nome: {a.Nome} | Resp.: {a.Responsavel} | Tel: {a.Telefone}");
-            }
+            repositorioAmigo.Inserir(novoAmigo);
+            MostrarMensagem("Amigo inserido com sucesso!", ConsoleColor.Green);
         }
 
         public void Editar()
         {
-            VisualizarTodos();
-            Console.Write("Digite o ID do amigo que deseja editar: ");
-            int id = int.Parse(Console.ReadLine()!);
-
-            var novo = ObterAmigo();
-
-            if (!novo.Validar(out string erros))
+            MostrarCabecalho("Editar Amigo");
+            if (!Listar())
             {
-                Console.WriteLine("Erros:\n" + erros);
+                MostrarMensagem("Nenhum amigo para editar.", ConsoleColor.Yellow);
+                return;
+            }
+            Console.Write("\nDigite o ID do amigo para editar: ");
+            int id = ObterIdValido();
+            if (repositorioAmigo.SelecionarPorId(id) == null)
+            {
+                MostrarMensagem("Amigo não encontrado.", ConsoleColor.Red);
                 return;
             }
 
-            if (repositorio.Editar(id, novo))
-                Console.WriteLine("Amigo atualizado.");
-            else
-                Console.WriteLine("Amigo não encontrado.");
+            Amigo amigoAtualizado = ObterDadosAmigo();
+            string[] erros = amigoAtualizado.Validar();
+            if (erros.Length > 0)
+            {
+                ApresentarErros(erros);
+                return;
+            }
+
+            repositorioAmigo.Editar(id, amigoAtualizado);
+            MostrarMensagem("Amigo editado com sucesso!", ConsoleColor.Green);
         }
 
         public void Excluir()
         {
-            VisualizarTodos();
-            Console.Write("Digite o ID do amigo para excluir: ");
-            int id = int.Parse(Console.ReadLine()!);
-
-            if (repositorio.Excluir(id))
-                Console.WriteLine("Amigo excluído.");
-            else
-                Console.WriteLine("Não foi possível excluir. Verifique se o amigo possui empréstimos.");
+            MostrarCabecalho("Excluir Amigo");
+            if (!Listar())
+            {
+                MostrarMensagem("Nenhum amigo para excluir.", ConsoleColor.Yellow);
+                return;
+            }
+            Console.Write("\nDigite o ID do amigo para excluir: ");
+            int id = ObterIdValido();
+            if (repositorioAmigo.SelecionarPorId(id) == null)
+            {
+                MostrarMensagem("Amigo não encontrado.", ConsoleColor.Red);
+                return;
+            }
+            repositorioAmigo.Excluir(id);
+            MostrarMensagem("Amigo excluído com sucesso!", ConsoleColor.Green);
         }
 
-        private Amigo ObterAmigo()
+        public bool Listar()
         {
-            Console.Write("Nome: ");
-            string nome = Console.ReadLine()!;
-            Console.Write("Responsável: ");
-            string responsavel = Console.ReadLine()!;
-            Console.Write("Telefone (formato (XX) XXXXX-XXXX): ");
-            string telefone = Console.ReadLine()!;
-
-            return new Amigo
+            MostrarCabecalho("Listando Todos os Amigos");
+            List<Amigo> amigos = repositorioAmigo.SelecionarTodos();
+            if (amigos.Count == 0)
             {
-                Nome = nome,
-                Responsavel = responsavel,
-                Telefone = telefone
-            };
+                Console.WriteLine("Nenhum amigo cadastrado.");
+                return false;
+            }
+            Console.WriteLine("{0,-5} | {1,-20} | {2,-20} | {3,-20}", "ID", "Nome", "Telefone", "Responsável");
+            Console.WriteLine(new string('-', 75));
+            foreach (var amigo in amigos)
+            {
+                Console.WriteLine("{0,-5} | {1,-20} | {2,-20} | {3,-20}", amigo.Id, amigo.Nome, amigo.Telefone, amigo.NomeResponsavel);
+            }
+            return true;
+        }
+
+        // ======================================================
+        // MÉTODOS PRIVADOS DE AJUDA (AGORA COMPLETOS)
+        // ======================================================
+
+        private Amigo ObterDadosAmigo()
+        {
+            Amigo amigo = new Amigo();
+
+            Console.Write("Nome do amigo: ");
+            amigo.Nome = Console.ReadLine();
+
+            Console.Write("Nome do responsável: ");
+            amigo.NomeResponsavel = Console.ReadLine();
+
+            Console.Write("Telefone (ex: (49) 99999-9999): ");
+            amigo.Telefone = Console.ReadLine();
+
+            return amigo;
+        }
+
+        private int ObterIdValido()
+        {
+            int id;
+            while (!int.TryParse(Console.ReadLine(), out id))
+            {
+                MostrarMensagem("Entrada inválida. Por favor, digite um número de ID.", ConsoleColor.Red);
+                Console.Write("Digite o ID novamente: ");
+            }
+            return id;
+        }
+
+        private void ApresentarErros(string[] erros)
+        {
+            MostrarMensagem("Por favor, corrija os seguintes erros:", ConsoleColor.Red);
+            foreach (string erro in erros)
+            {
+                Console.WriteLine($"- {erro}");
+            }
+            Console.ReadKey();
+        }
+
+        private void MostrarCabecalho(string titulo)
+        {
+            Console.Clear();
+            Console.WriteLine("--- Clube da Leitura ---");
+            Console.WriteLine($"\n{titulo}\n");
+        }
+
+        private void MostrarMensagem(string mensagem, ConsoleColor cor)
+        {
+            Console.ForegroundColor = cor;
+            Console.WriteLine($"\n{mensagem}");
+            Console.ResetColor();
+            Console.WriteLine("\nPressione qualquer tecla para continuar...");
+            Console.ReadKey();
         }
     }
 }

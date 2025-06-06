@@ -1,47 +1,21 @@
-﻿using ClubeDaLeitura.Entidades;
+﻿// Local: ClubeDaLeitura.ConsoleApp1/Repositorios/RepositorioCaixa.cs
+using ClubeDaLeitura.ConsoleApp1.Entidades;
 
-namespace ClubeDaLeitura.Repositorios
+namespace ClubeDaLeitura.ConsoleApp1.Repositorios
 {
-    public class RepositorioCaixa
+    public class RepositorioCaixa : RepositorioBase<Caixa>
     {
-        private List<Caixa> caixas = new();
-        private int contadorId = 1;
-
-        public void Inserir(Caixa caixa)
+        // A única responsabilidade específica do RepositorioCaixa é saber
+        // como transferir os dados de uma caixa atualizada para uma existente.
+        public override void Editar(int id, Caixa caixaAtualizada)
         {
-            caixa.Id = contadorId++;
-            caixas.Add(caixa);
-        }
-
-        public bool Editar(int id, Caixa nova)
-        {
-            var caixa = SelecionarPorId(id);
-            if (caixa == null) return false;
-
-            caixa.Etiqueta = nova.Etiqueta;
-            caixa.Cor = nova.Cor;
-            caixa.DiasEmprestimo = nova.DiasEmprestimo;
-
-            return true;
-        }
-
-        public bool Excluir(int id)
-        {
-            var caixa = SelecionarPorId(id);
-            if (caixa == null || caixa.IdsRevistas.Any())
-                return false;
-
-            caixas.Remove(caixa);
-            return true;
-        }
-
-        public List<Caixa> SelecionarTodos() => caixas;
-
-        public Caixa? SelecionarPorId(int id) => caixas.FirstOrDefault(c => c.Id == id);
-
-        public bool ExisteEtiqueta(string etiqueta)
-        {
-            return caixas.Any(c => c.Etiqueta.Equals(etiqueta, StringComparison.OrdinalIgnoreCase));
+            Caixa caixaExistente = SelecionarPorId(id);
+            if (caixaExistente != null)
+            {
+                caixaExistente.Cor = caixaAtualizada.Cor;
+                caixaExistente.Etiqueta = caixaAtualizada.Etiqueta;
+                caixaExistente.DiasEmprestimo = caixaAtualizada.DiasEmprestimo;
+            }
         }
     }
 }
