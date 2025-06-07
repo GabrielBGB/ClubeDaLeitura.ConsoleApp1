@@ -4,12 +4,16 @@ namespace ClubeDaLeitura.ConsoleApp1.Repositorios
 {
     public class RepositorioReserva : RepositorioBase<Reserva>
     {
-        public override void Editar(int id, Reserva registroAtualizado)
+        public RepositorioReserva() : base("reservas.json") { }
+
+        public override void Editar(int id, Reserva reservaAtualizada)
         {
             Reserva reservaExistente = SelecionarPorId(id);
             if (reservaExistente != null)
             {
-                reservaExistente.Status = registroAtualizado.Status;
+                // O status é a principal coisa a se editar em uma reserva (Ativa -> Concluída)
+                reservaExistente.Status = reservaAtualizada.Status;
+                SalvarDados();
             }
         }
     }

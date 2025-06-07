@@ -4,7 +4,8 @@ namespace ClubeDaLeitura.ConsoleApp1.Repositorios
 {
     public class RepositorioAmigo : RepositorioBase<Amigo>
     {
-        // PRECISA IMPLEMENTAR O MÉTODO 'EDITAR' DA CLASSE BASE
+        public RepositorioAmigo() : base("amigos.json") { }
+
         public override void Editar(int id, Amigo amigoAtualizado)
         {
             Amigo amigoExistente = SelecionarPorId(id);
@@ -13,6 +14,7 @@ namespace ClubeDaLeitura.ConsoleApp1.Repositorios
                 amigoExistente.Nome = amigoAtualizado.Nome;
                 amigoExistente.NomeResponsavel = amigoAtualizado.NomeResponsavel;
                 amigoExistente.Telefone = amigoAtualizado.Telefone;
+                SalvarDados();
             }
         }
     }
