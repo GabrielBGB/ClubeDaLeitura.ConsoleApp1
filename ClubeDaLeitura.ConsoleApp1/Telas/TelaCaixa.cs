@@ -1,4 +1,4 @@
-﻿// Local: ClubeDaLeitura.ConsoleApp1/Telas/TelaCaixa.cs
+﻿// Local: Telas/TelaCaixa.cs
 using ClubeDaLeitura.ConsoleApp1.Entidades;
 using ClubeDaLeitura.ConsoleApp1.Repositorios;
 using System;
@@ -19,8 +19,8 @@ namespace ClubeDaLeitura.ConsoleApp1.Telas
         {
             MostrarCabecalho("Inserir Nova Caixa");
             Caixa novaCaixa = ObterDadosCaixa();
-            string[] erros = novaCaixa.Validar();
 
+            string[] erros = novaCaixa.Validar();
             if (erros.Length > 0)
             {
                 ApresentarErros(erros);
@@ -46,6 +46,7 @@ namespace ClubeDaLeitura.ConsoleApp1.Telas
                 MostrarMensagem("Caixa não encontrada.", ConsoleColor.Red);
                 return;
             }
+
             Caixa caixaAtualizada = ObterDadosCaixa();
             string[] erros = caixaAtualizada.Validar();
             if (erros.Length > 0)
@@ -82,6 +83,8 @@ namespace ClubeDaLeitura.ConsoleApp1.Telas
             List<Caixa> caixas = repositorioCaixa.SelecionarTodos();
             if (caixas.Count == 0)
             {
+                // Mensagem agora é mostrada pelo Listar, para evitar duplicação
+                // MostrarMensagem("Nenhuma caixa cadastrada.", ConsoleColor.Yellow);
                 Console.WriteLine("Nenhuma caixa cadastrada.");
                 return false;
             }
@@ -94,23 +97,34 @@ namespace ClubeDaLeitura.ConsoleApp1.Telas
             return true;
         }
 
-        // ======================================================
-        // MÉTODOS PRIVADOS DE AJUDA
-        // ======================================================
-
         private Caixa ObterDadosCaixa()
         {
             Caixa caixa = new Caixa();
-            Console.Write("Digite a cor da caixa: ");
-            caixa.Cor = Console.ReadLine();
+
+            Console.WriteLine("\nCores disponíveis: " + string.Join(", ", Enum.GetNames(typeof(CorCaixa))));
+            CorCaixa corSelecionada;
+            while (true)
+            {
+                Console.Write("Digite a cor da caixa: ");
+                string corDigitada = Console.ReadLine();
+
+                if (Enum.TryParse(corDigitada, true, out corSelecionada))
+                {
+                    caixa.Cor = corSelecionada;
+                    break;
+                }
+
+                MostrarMensagem("Cor inválida. Por favor, escolha uma das cores da lista.", ConsoleColor.Red, pausar: false);
+            }
+
             Console.Write("Digite a etiqueta da caixa: ");
             caixa.Etiqueta = Console.ReadLine();
-            Console.Write("Digite o prazo máximo de empréstimo (em dias): ");
 
+            Console.Write("Digite o prazo máximo de empréstimo (em dias): ");
             int diasEmprestimo;
             while (!int.TryParse(Console.ReadLine(), out diasEmprestimo) || diasEmprestimo <= 0)
             {
-                MostrarMensagem("Entrada inválida. Por favor, digite um número positivo.", ConsoleColor.Red);
+                MostrarMensagem("Entrada inválida. Por favor, digite um número positivo.", ConsoleColor.Red, pausar: false);
                 Console.Write("Digite o prazo máximo de empréstimo (em dias): ");
             }
             caixa.DiasEmprestimo = diasEmprestimo;
@@ -122,7 +136,7 @@ namespace ClubeDaLeitura.ConsoleApp1.Telas
             int id;
             while (!int.TryParse(Console.ReadLine(), out id))
             {
-                MostrarMensagem("Entrada inválida. Por favor, digite um número de ID.", ConsoleColor.Red);
+                MostrarMensagem("Entrada inválida. Por favor, digite um número de ID.", ConsoleColor.Red, pausar: false);
                 Console.Write("Digite o ID novamente: ");
             }
             return id;
@@ -145,13 +159,17 @@ namespace ClubeDaLeitura.ConsoleApp1.Telas
             Console.WriteLine($"\n{titulo}\n");
         }
 
-        private void MostrarMensagem(string mensagem, ConsoleColor cor)
+        private void MostrarMensagem(string mensagem, ConsoleColor cor, bool pausar = true)
         {
             Console.ForegroundColor = cor;
             Console.WriteLine($"\n{mensagem}");
             Console.ResetColor();
-            Console.WriteLine("\nPressione qualquer tecla para continuar...");
-            Console.ReadKey();
+
+            if (pausar)
+            {
+                Console.WriteLine("\nPressione qualquer tecla para continuar...");
+                Console.ReadKey();
+            }
         }
     }
 }

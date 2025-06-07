@@ -12,6 +12,7 @@ namespace ClubeDaLeitura.ConsoleApp1.Repositorios
             Caixa caixaExistente = SelecionarPorId(id);
             if (caixaExistente != null)
             {
+                // A linha abaixo foi atualizada para o novo tipo 'CorCaixa'
                 caixaExistente.Cor = caixaAtualizada.Cor;
                 caixaExistente.Etiqueta = caixaAtualizada.Etiqueta;
                 caixaExistente.DiasEmprestimo = caixaAtualizada.DiasEmprestimo;

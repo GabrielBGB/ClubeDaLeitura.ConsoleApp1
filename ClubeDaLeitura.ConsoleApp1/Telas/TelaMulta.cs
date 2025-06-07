@@ -10,10 +10,14 @@ namespace ClubeDaLeitura.ConsoleApp1.Telas
     public class TelaMulta
     {
         private readonly RepositorioMulta repositorioMulta;
+        private readonly RepositorioAmigo repositorioAmigo;
+        private readonly TelaAmigo telaAmigo;
 
-        public TelaMulta(RepositorioMulta repositorio)
+        public TelaMulta(RepositorioMulta repoMulta, RepositorioAmigo repoAmigo, TelaAmigo tAmigo)
         {
-            repositorioMulta = repositorio;
+            repositorioMulta = repoMulta;
+            repositorioAmigo = repoAmigo;
+            telaAmigo = tAmigo;
         }
 
         public void ApresentarMenu()
@@ -22,29 +26,19 @@ namespace ClubeDaLeitura.ConsoleApp1.Telas
             while (!voltar)
             {
                 MostrarCabecalho("Gerenciar Multas");
-                Console.WriteLine("[1] Listar todas as multas");
-                Console.WriteLine("[2] Quitar uma multa");
+                Console.WriteLine("[1] Visualizar Multas Pendentes");
+                Console.WriteLine("[2] Quitar uma Multa");
+                Console.WriteLine("[3] Visualizar Multas por Amigo");
                 Console.WriteLine("\n[0] Voltar");
-
                 Console.Write("\nEscolha uma opção: ");
                 string opcao = Console.ReadLine();
-
                 switch (opcao)
                 {
-                    case "1":
-                        ListarTodas();
-                        Console.ReadKey();
-                        break;
-                    case "2":
-                        QuitarMulta();
-                        break;
-                    case "0":
-                        voltar = true;
-                        break;
-                    default:
-                        MostrarMensagem("Opção inválida!", ConsoleColor.Red);
-                        Console.ReadKey();
-                        break;
+                    case "1": ListarMultas(pendentes: true); break;
+                    case "2": QuitarMulta(); break;
+                    case "3": VisualizarMultasPorAmigo(); break;
+                    case "0": voltar = true; break;
+                    default: MostrarMensagem("Opção inválida!", ConsoleColor.Red); break;
                 }
             }
         }
@@ -52,83 +46,77 @@ namespace ClubeDaLeitura.ConsoleApp1.Telas
         public void QuitarMulta()
         {
             MostrarCabecalho("Quitar Multa Pendente");
-            List<Multa> multasPendentes = repositorioMulta
-                .SelecionarTodos()
-                .Where(m => !m.EstaPaga)
-                .ToList();
-
-            if (!Listar(multasPendentes))
-            {
-                MostrarMensagem("Nenhuma multa pendente para quitar.", ConsoleColor.Yellow);
-                Console.ReadKey();
-                return;
-            }
-
+            if (!ListarMultas(pendentes: true)) return;
             Console.Write("\nDigite o ID da multa que deseja quitar: ");
             int idMulta = ObterIdValido();
-
             Multa multa = repositorioMulta.SelecionarPorId(idMulta);
-
             if (multa == null || multa.EstaPaga)
             {
                 MostrarMensagem("ID de multa inválido ou a multa já foi paga.", ConsoleColor.Red);
-                Console.ReadKey();
                 return;
             }
-
             multa.EstaPaga = true;
-
-            // Criamos uma nova instância apenas para passar ao método Editar, como exige o padrão
-            Multa multaAtualizada = new Multa();
-            multaAtualizada.Valor = multa.Valor;
-            multaAtualizada.EstaPaga = true;
-
-            repositorioMulta.Editar(idMulta, multaAtualizada);
-
+            repositorioMulta.Editar(idMulta, multa);
             MostrarMensagem("Multa quitada com sucesso!", ConsoleColor.Green);
-            Console.ReadKey();
         }
 
-        public void ListarTodas()
+        private void VisualizarMultasPorAmigo()
         {
-            MostrarCabecalho("Listando Todas as Multas");
+            MostrarCabecalho("Visualizar Multas por Amigo");
+            if (!telaAmigo.Listar()) { MostrarMensagem("Nenhum amigo cadastrado.", ConsoleColor.Yellow); return; }
+            Console.Write("\nDigite o ID do amigo para ver suas multas: ");
+            int idAmigo = ObterIdValido();
+            if (repositorioAmigo.SelecionarPorId(idAmigo) == null) { MostrarMensagem("Amigo não encontrado.", ConsoleColor.Red); return; }
+            List<Multa> multasDoAmigo = repositorioMulta.SelecionarTodos().Where(m => m.Emprestimo.Amigo.Id == idAmigo).ToList();
+            Listar(multasDoAmigo);
+        }
+
+        private bool ListarMultas(bool pendentes)
+        {
+            MostrarCabecalho("Listando Multas " + (pendentes ? "Pendentes" : ""));
             List<Multa> multas = repositorioMulta.SelecionarTodos();
-            if (!Listar(multas))
-            {
-                MostrarMensagem("Nenhuma multa registrada.", ConsoleColor.Yellow);
-            }
+            if (pendentes)
+                multas = multas.Where(m => !m.EstaPaga).ToList();
+            return Listar(multas);
         }
 
         private bool Listar(List<Multa> multas)
         {
             if (multas.Count == 0)
             {
+                MostrarMensagem("Nenhuma multa encontrada para os critérios informados.", ConsoleColor.Yellow);
                 return false;
             }
-            Console.WriteLine("{0,-5} | {1,-10} | {2,-20} | {3,-10}", "ID", "Status", "Amigo do Empréstimo", "Valor");
+            Console.WriteLine("{0,-5} | {1,-10} | {2,-20} | {3,-10}", "ID", "Status", "Amigo", "Valor");
             Console.WriteLine(new string('-', 60));
             foreach (Multa multa in multas)
             {
-                // USA AS PROPRIEDADES CORRETAS: Id, EstaPaga, Emprestimo.Amigo.Nome, Valor
-                string status = multa.EstaPaga ? "Paga" : "Pendente";
-                Console.WriteLine("{0,-5} | {1,-10} | {2,-20} | R$ {3,-8:F2}",
-                    multa.Id,
-                    status,
-                    multa.Emprestimo?.Amigo?.Nome ?? "N/A",
-                    multa.Valor);
+                string status = multa.EstaPaga ? "Quitada" : "Pendente";
+                Console.WriteLine("{0,-5} | {1,-10} | {2,-20} | R$ {3,-8:F2}", multa.Id, status, multa.Emprestimo.Amigo.Nome, multa.Valor);
             }
+            Console.ReadKey();
             return true;
         }
 
+        // ======================================================
+        // MÉTODOS PRIVADOS DE AJUDA (ESTAVAM FALTANDO)
+        // ======================================================
         private int ObterIdValido()
         {
             int id;
-            while (!int.TryParse(Console.ReadLine(), out id))
+            while (!int.TryParse(Console.ReadLine(), out id) || id <= 0)
             {
-                MostrarMensagem("Entrada inválida. Por favor, digite um número de ID.", ConsoleColor.Red);
+                MostrarMensagem("Entrada inválida. Por favor, digite um número de ID válido.", ConsoleColor.Red);
                 Console.Write("Digite o ID novamente: ");
             }
             return id;
+        }
+
+        private void ApresentarErros(string[] erros)
+        {
+            MostrarMensagem("Por favor, corrija os seguintes erros:", ConsoleColor.Red);
+            foreach (string erro in erros) Console.WriteLine($"- {erro}");
+            Console.ReadKey();
         }
 
         private void MostrarCabecalho(string titulo)
@@ -143,6 +131,8 @@ namespace ClubeDaLeitura.ConsoleApp1.Telas
             Console.ForegroundColor = cor;
             Console.WriteLine($"\n{mensagem}");
             Console.ResetColor();
+            Console.WriteLine("\nPressione qualquer tecla para continuar...");
+            Console.ReadKey();
         }
     }
 }
