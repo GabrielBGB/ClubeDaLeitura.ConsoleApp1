@@ -39,7 +39,7 @@ namespace ClubeDaLeitura.ConsoleApp1.Entidades
 
         public override string ToString()
         {
-            // ATUALIZE O TOSTRING PARA MOSTRAR O STATUS
+            
             return $"Id: {Id} | Status: {Status} | Amigo: {Amigo?.Nome} | Revista: {Revista?.Titulo} | Devolução: {DataDevolucao.ToShortDateString()}";
         }
     }
