@@ -98,9 +98,7 @@ namespace ClubeDaLeitura.ConsoleApp1.Telas
             return true;
         }
 
-        // ======================================================
-        // MÉTODOS PRIVADOS DE AJUDA (ESTAVAM FALTANDO)
-        // ======================================================
+        
         private int ObterIdValido()
         {
             int id;
